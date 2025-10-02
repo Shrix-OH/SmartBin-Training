@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 6
+names: ['Cans', 'Glass', 'Hazard', 'Organic', 'PaperCardboard', 'plastic bottle']
+
+roboflow:
+  workspace: robotics-project-jigbl
+  project: y3project-pdjah
+  version: 3
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/robotics-project-jigbl/y3project-pdjah/dataset/3
