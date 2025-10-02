@@ -2,6 +2,34 @@ I made this for training ml models to detect classes of rubbish in places like c
 Has classes like plastic bottles, cans, paper, organics etc.
 Free for anyone to use.
 
+## Quick Start
+
+### 1. Setup
+```bash
+python setup.py
+```
+Choose `g` for GPU or `c` for CPU when prompted.
+
+### 2. Train Model
+```bash
+# GPU training
+python training.py --data Y3-v3 --epochs 100 --device 0
+
+# CPU training  
+python training.py --data Y3-v3 --epochs 100 --device cpu
+```
+
+### 3. Run on Webcam
+```bash
+# GPU inference
+python webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device 0
+
+# CPU inference
+python webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device cpu
+```
+
+That's it! Press `q` or `ESC` to quit the webcam.
+
 ## YOLOv8 Training and Webcam Inference
 
 This project provides two scripts:
@@ -19,13 +47,13 @@ This project provides two scripts:
 
 Python 3.8–3.12 is recommended.
 
-Install packages:
+Install packages (quick path):
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Note about PyTorch: Installing GPU-enabled PyTorch is platform- and CUDA/ROCm-specific. If you need GPU acceleration, install PyTorch first by following the official selector and then install the rest of the requirements.
+Note about PyTorch: Installing GPU-enabled PyTorch is platform- and CUDA/ROCm-specific. For a one-command setup, use the provided setup script which will ask CPU or GPU and install the appropriate PyTorch build first, then the rest of the requirements.
 
 - PyTorch selector: `https://pytorch.org/get-started/locally/`
 
@@ -50,6 +78,18 @@ Then install the rest:
 
 ```bash
 pip install -r requirements.txt
+### Quick Setup (interactive)
+
+Use the interactive installer to choose GPU (CUDA) or CPU:
+
+```bash
+python setup.py
+```
+
+This will:
+- Install PyTorch GPU wheels (CUDA 12.4) if you choose GPU, or CPU-only wheels otherwise
+- Install project requirements from `requirements.txt`
+
 ```
 
 ### Training
