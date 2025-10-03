@@ -60,15 +60,16 @@ python training.py --data Y3-v3 --epochs 100 --device cpu
 ### 3. Run on Webcam
 ```bash
 # Using GPU 
-python webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device 0
+python webcam.py --weights runs/train/yolov8n-20e2/weights/best.pt --device 0
 # Or on Linux: python3 webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device 0
 
 # Using CPU 
-python webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device cpu
+python webcam.py --weights runs/train/yolov8n-20e2/weights/best.pt --device cpu
 # Or on Linux: python3 webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device cpu
 ```
 
 That's it! Press `q` or `ESC` to quit the webcam.
+Or if that doesnt work click ctrl c in the terminal running the webcam
 
 ``` ############################################################## ```
 ``` YOU SHOULDNT HAVE TO DO ANYTHING PAST HERE IF EVERYTHING WORKS ```
