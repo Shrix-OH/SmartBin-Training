@@ -6,6 +6,15 @@ ENV SETUP BROKEN RN
 ## Quick Start
 
 ### 1. Setup (Automatic Virtual Environment)
+
+FIRST THING TO DO !!!!!!!
+cd into the correct directory
+
+```bash
+# Make sure you're in the directory containing all the files (e.g. Y3-v1, Y3-v2, Y3-v3, runs/train etc) 
+cd SmartBin-Training
+```
+
 The setup script **automatically creates and uses a virtual environment** - you don't need to create one manually!
 
 ```bash
@@ -36,6 +45,17 @@ Choose your hardware when prompted:
 - Linux/macOS (bash/zsh): `source .venv/bin/activate`
 
 **Important:** The setup script ensures everything is installed in a virtual environment regardless of your choice - this protects your system Python installation.
+
+IMPORTANT
+Before running training or webcam, you must activate the env
+
+```bash
+# Windows etc
+./.venv/Scripts/Activate.ps1
+
+# Linux 
+source .venv/bin/activate
+```
 
 ### 2. Train Model
 ```bash
