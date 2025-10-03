@@ -1,6 +1,7 @@
 I made this for training ml models to detect classes of rubbish in places like college campuses etc.
 Has classes like plastic bottles, cans, paper, organics etc.
-Free for anyone to use.
+
+ENV SETUP BROKEN RN
 
 ## Quick Start
 
