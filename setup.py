@@ -3,6 +3,49 @@ import sys
 import subprocess
 
 
+def is_in_virtualenv() -> bool:
+    # Detect venv via sys prefixes or VIRTUAL_ENV env var
+    if getattr(sys, "base_prefix", sys.prefix) != sys.prefix:
+        return True
+    if hasattr(sys, "real_prefix"):
+        return True
+    if os.environ.get("VIRTUAL_ENV"):
+        return True
+    return False
+
+
+def get_project_root() -> str:
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def get_venv_python_path(venv_root: str) -> str:
+    if os.name == "nt":
+        return os.path.join(venv_root, "Scripts", "python.exe")
+    return os.path.join(venv_root, "bin", "python")
+
+
+def ensure_virtualenv() -> None:
+    """Create .venv if absent and re-execute this script inside it."""
+    if is_in_virtualenv():
+        return
+
+    project_root = get_project_root()
+    venv_dir = os.path.join(project_root, ".venv")
+    venv_python = get_venv_python_path(venv_dir)
+
+    if not os.path.exists(venv_python):
+        print("Creating virtual environment at .venv ...")
+        code = subprocess.call([sys.executable, "-m", "venv", venv_dir])
+        if code != 0:
+            print("Failed to create virtual environment. Please create it manually and retry.")
+            sys.exit(code)
+
+    # Re-exec inside the venv so subsequent pip installs target .venv
+    print("Re-running setup inside .venv ...")
+    code = subprocess.call([venv_python, os.path.abspath(__file__)] + sys.argv[1:])
+    sys.exit(code)
+
+
 def run(cmd: list[str]) -> int:
     try:
         return subprocess.call(cmd)
@@ -78,6 +121,8 @@ def install_project_requirements() -> None:
 
 
 def main() -> None:
+    # Always bootstrap a local venv and run inside it
+    ensure_virtualenv()
     choice = choose_device()
     install_torch(choice)
     install_project_requirements()

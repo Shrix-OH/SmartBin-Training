@@ -14,6 +14,13 @@ Choose one of:
 - `r` = AMD ROCm CPU runtime (Linux)
 - `c` = CPU only (all platforms)
 
+Notes:
+- The setup script automatically creates a local `.venv` and re-runs itself inside it.
+- After setup, to manually activate the environment later:
+  - Windows (PowerShell): `./.venv/Scripts/Activate.ps1`
+  - Windows (cmd): ` .\.venv\Scripts\activate.bat`
+  - Linux/macOS (bash/zsh): `source .venv/bin/activate`
+
 ### 2. Train Model
 ```bash
 # Using GPU
