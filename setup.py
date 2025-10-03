@@ -19,10 +19,12 @@ def pip_install(args: list[str]) -> int:
 def choose_device() -> str:
     print("Select install target for PyTorch:")
     print("  [g] GPU (CUDA/NVIDIA)")
+    print("  [a] GPU (ROCm/AMD, Linux)")
+    print("  [r] CPU (ROCm runtime, AMD, Linux)")
     print("  [c] CPU only")
-    choice = input("Enter g or c: ").strip().lower()
-    if choice not in {"g", "c"}:
-        print("Invalid choice. Please run again and enter 'g' or 'c'.")
+    choice = input("Enter g, a, r or c: ").strip().lower()
+    if choice not in {"g", "a", "r", "c"}:
+        print("Invalid choice. Please run again and enter 'g', 'a', 'r' or 'c'.")
         sys.exit(1)
     return choice
 
@@ -36,6 +38,23 @@ def install_torch(choice: str) -> None:
         code = pip_install(["torch", "torchvision", "--index-url", index_url])
         if code != 0:
             print("PyTorch (GPU) install failed. You may need a different CUDA wheel. See https://pytorch.org/get-started/locally/")
+            sys.exit(code)
+    elif choice == "a":
+        # ROCm GPU wheels (Linux only). Adjust if your system uses a different ROCm version.
+        index_url = "https://download.pytorch.org/whl/rocm6.0"
+        print("Installing PyTorch (GPU, ROCm 6.0 wheels for AMD, Linux only)...")
+        code = pip_install(["torch", "torchvision", "--index-url", index_url])
+        if code != 0:
+            print("PyTorch (GPU/ROCm) install failed. See https://pytorch.org/get-started/locally/")
+            sys.exit(code)
+    elif choice == "r":
+        # ROCm CPU runtime wheels: use CPU wheels but allow AMD users on Linux without CUDA.
+        # Note: PyTorch does not ship a separate 'ROCm CPU' wheel; CPU wheel is used.
+        index_url = "https://download.pytorch.org/whl/cpu"
+        print("Installing PyTorch (CPU wheels for ROCm CPU path, Linux)...")
+        code = pip_install(["torch", "torchvision", "--index-url", index_url])
+        if code != 0:
+            print("PyTorch (CPU) install failed. See https://pytorch.org/get-started/locally/")
             sys.exit(code)
     else:
         print("Installing PyTorch (CPU-only wheels)...")
@@ -63,7 +82,7 @@ def main() -> None:
     install_torch(choice)
     install_project_requirements()
     print("\nSetup complete! You can now train:")
-    if choice == "g":
+    if choice in {"g", "a"}:
         print("  python training.py --data Y3-v1/data.yaml --model yolov8n.pt --epochs 100 --device 0")
     else:
         print("  python training.py --data Y3-v1/data.yaml --model yolov8n.pt --epochs 100 --device cpu")

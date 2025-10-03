@@ -8,23 +8,27 @@ Free for anyone to use.
 ```bash
 python setup.py
 ```
-Choose `g` for GPU or `c` for CPU when prompted.
+Choose one of:
+- `g` = NVIDIA GPU (CUDA)
+- `a` = AMD GPU (ROCm, Linux)
+- `r` = AMD ROCm CPU runtime (Linux)
+- `c` = CPU only (all platforms)
 
 ### 2. Train Model
 ```bash
-# GPU training
+# Using GPU
 python training.py --data Y3-v3 --epochs 100 --device 0
 
-# CPU training  
+# Using CPU  
 python training.py --data Y3-v3 --epochs 100 --device cpu
 ```
 
 ### 3. Run on Webcam
 ```bash
-# GPU inference
+# Using GPU 
 python webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device 0
 
-# CPU inference
+# Using CPU 
 python webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device cpu
 ```
 
@@ -69,6 +73,16 @@ pip install torch --index-url https://download.pytorch.org/whl/cu121
 pip install torch --index-url https://download.pytorch.org/whl/cu121
 ```
 
+- Linux with ROCm 6.x (AMD GPUs):
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/rocm6.0
+```
+
+- Linux with ROCm CPU path (no GPU compute):
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+```
+
 - CPU-only (all platforms):
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
@@ -78,19 +92,22 @@ Then install the rest:
 
 ```bash
 pip install -r requirements.txt
+```
+
 ### Quick Setup (interactive)
 
-Use the interactive installer to choose GPU (CUDA) or CPU:
+Use the interactive installer to choose NVIDIA CUDA GPU, AMD ROCm GPU/CPU, or CPU-only:
 
 ```bash
 python setup.py
 ```
 
 This will:
-- Install PyTorch GPU wheels (CUDA 12.4) if you choose GPU, or CPU-only wheels otherwise
+- Install PyTorch wheels for the chosen backend:
+  - CUDA (cu124) for `g`
+  - ROCm 6.0 for `a` (Linux)
+  - CPU wheels for `r` (ROCm CPU path, Linux) and `c`
 - Install project requirements from `requirements.txt`
-
-```
 
 ### Training
 
@@ -168,6 +185,11 @@ python3 webcam.py --weights ./runs/train/yolov8n-cpu/weights/best.pt --device cp
 - Keep `--workers` low on Windows to avoid DataLoader issues.
 - Ensure `yolov8n.pt` is present in the project root for training initialization, or update the model path in `training.py`.
 - If you hit CUDA/driver mismatches, confirm the Torch CUDA version matches your driver and rerun the Torch install step.
+- On ROCm (Linux), verify install with:
+  ```bash
+  python -c "import torch; print(torch.cuda.is_available(), getattr(torch.version, 'hip', None))"
+  ```
+  For ROCm GPU (`a`), `cuda.is_available()` should be True and `hip` should show a version. For ROCm CPU (`r`), expect CPU usage.
 
 
 
