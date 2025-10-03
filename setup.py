@@ -4,12 +4,21 @@ import subprocess
 
 
 def is_in_virtualenv() -> bool:
-    # Detect venv via sys prefixes or VIRTUAL_ENV env var
+    """Detect if we're running inside a virtual environment."""
+    # Check for venv (Python 3.3+)
     if getattr(sys, "base_prefix", sys.prefix) != sys.prefix:
         return True
+    # Check for virtualenv (older style)
     if hasattr(sys, "real_prefix"):
         return True
+    # Check environment variable
     if os.environ.get("VIRTUAL_ENV"):
+        return True
+    # Additional check: see if we're running from a venv python executable
+    if "/.venv/" in sys.executable or "\\.venv\\" in sys.executable:
+        return True
+    # Check if we're in a conda environment
+    if os.environ.get("CONDA_DEFAULT_ENV"):
         return True
     return False
 
@@ -27,6 +36,7 @@ def get_venv_python_path(venv_root: str) -> str:
 def ensure_virtualenv() -> None:
     """Create .venv if absent and re-execute this script inside it."""
     if is_in_virtualenv():
+        print("Already running inside virtual environment.")
         return
 
     project_root = get_project_root()
@@ -35,15 +45,35 @@ def ensure_virtualenv() -> None:
 
     if not os.path.exists(venv_python):
         print("Creating virtual environment at .venv ...")
-        code = subprocess.call([sys.executable, "-m", "venv", venv_dir])
-        if code != 0:
-            print("Failed to create virtual environment. Please create it manually and retry.")
-            sys.exit(code)
+        try:
+            code = subprocess.call([sys.executable, "-m", "venv", venv_dir])
+            if code != 0:
+                print("ERROR: Failed to create virtual environment.")
+                print("Please ensure you have Python 3.3+ and the venv module is available.")
+                print("You can try creating it manually with:")
+                print(f"  python -m venv {venv_dir}")
+                sys.exit(code)
+            print("Virtual environment created successfully.")
+        except FileNotFoundError:
+            print("ERROR: Python executable not found. Please ensure Python is in your PATH.")
+            sys.exit(1)
+    else:
+        print("Found existing .venv directory.")
 
-    # Re-exec inside the venv so subsequent pip installs target .venv
+    # Verify the venv python exists
+    if not os.path.exists(venv_python):
+        print(f"ERROR: Virtual environment Python not found at: {venv_python}")
+        print("The .venv directory may be corrupted. Please delete it and run setup again.")
+        sys.exit(1)
+
+    # ALWAYS re-exec inside the venv when not already in one
     print("Re-running setup inside .venv ...")
-    code = subprocess.call([venv_python, os.path.abspath(__file__)] + sys.argv[1:])
-    sys.exit(code)
+    try:
+        code = subprocess.call([venv_python, os.path.abspath(__file__)] + sys.argv[1:])
+        sys.exit(code)
+    except FileNotFoundError:
+        print(f"ERROR: Failed to execute Python in virtual environment: {venv_python}")
+        sys.exit(1)
 
 
 def run(cmd: list[str]) -> int:
@@ -123,14 +153,31 @@ def install_project_requirements() -> None:
 def main() -> None:
     # Always bootstrap a local venv and run inside it
     ensure_virtualenv()
+    
+    # If we reach here, we're guaranteed to be inside the virtual environment
+    print(f"Running setup inside virtual environment: {os.environ.get('VIRTUAL_ENV', 'detected')}")
+    
     choice = choose_device()
     install_torch(choice)
     install_project_requirements()
     print("\nSetup complete! You can now train:")
+    print("\nTo activate the virtual environment in future sessions:")
+    if os.name == "nt":
+        print("  # Windows PowerShell:")
+        print("  ./.venv/Scripts/Activate.ps1")
+        print("  # Windows Command Prompt:")
+        print("  .venv\\Scripts\\activate.bat")
+    else:
+        print("  # Linux/macOS:")
+        print("  source .venv/bin/activate")
+    
+    print("\nTraining commands:")
     if choice in {"g", "a"}:
         print("  python training.py --data Y3-v1/data.yaml --model yolov8n.pt --epochs 100 --device 0")
+        print("  # Or on Linux: python3 training.py --data Y3-v1/data.yaml --model yolov8n.pt --epochs 100 --device 0")
     else:
         print("  python training.py --data Y3-v1/data.yaml --model yolov8n.pt --epochs 100 --device cpu")
+        print("  # Or on Linux: python3 training.py --data Y3-v1/data.yaml --model yolov8n.pt --epochs 100 --device cpu")
 
 
 if __name__ == "__main__":

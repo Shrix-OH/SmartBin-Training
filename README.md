@@ -4,42 +4,76 @@ Free for anyone to use.
 
 ## Quick Start
 
-### 1. Setup
+### 1. Setup (Automatic Virtual Environment)
+The setup script **automatically creates and uses a virtual environment** - you don't need to create one manually!
+
 ```bash
+# Windows:
 python setup.py
+
+# Linux/macOS (use python3 if python points to Python 2.x):
+python setup.py
+# or
+python3 setup.py
 ```
-Choose one of:
+
+**What happens:**
+1. The script detects if you're already in a virtual environment
+2. If not, it creates a `.venv` folder in the project directory
+3. It automatically re-runs itself inside the virtual environment
+4. All packages are installed safely in the isolated environment
+
+Choose your hardware when prompted:
 - `g` = NVIDIA GPU (CUDA)
 - `a` = AMD GPU (ROCm, Linux)
 - `r` = AMD ROCm CPU runtime (Linux)
 - `c` = CPU only (all platforms)
 
-Notes:
-- The setup script automatically creates a local `.venv` and re-runs itself inside it.
-- After setup, to manually activate the environment later:
-  - Windows (PowerShell): `./.venv/Scripts/Activate.ps1`
-  - Windows (cmd): ` .\.venv\Scripts\activate.bat`
-  - Linux/macOS (bash/zsh): `source .venv/bin/activate`
+**For future sessions**, activate the virtual environment:
+- Windows (PowerShell): `./.venv/Scripts/Activate.ps1`
+- Windows (Command Prompt): `.venv\Scripts\activate.bat`
+- Linux/macOS (bash/zsh): `source .venv/bin/activate`
+
+**Important:** The setup script ensures everything is installed in a virtual environment regardless of your choice - this protects your system Python installation.
 
 ### 2. Train Model
 ```bash
+
+# There are 3 different datasets
+# V1 has 800 images, V2 has like 4,000 and V3 has almost 15,000
+# When choosing what dataset to use in training, use Y3-v1, Y3-v2 or Y3-v3
+# Commands below use v3 but for simple use you could use v2 instead 
+
+
 # Using GPU
 python training.py --data Y3-v3 --epochs 100 --device 0
+# Or on Linux: python3 training.py --data Y3-v3 --epochs 100 --device 0
+# Train with as many epochs as you want 100 could take a while
 
 # Using CPU  
 python training.py --data Y3-v3 --epochs 100 --device cpu
+# Or on Linux: python3 training.py --data Y3-v3 --epochs 100 --device cpu
+# Train with as many epochs as you want 100 could take a while
 ```
 
 ### 3. Run on Webcam
 ```bash
 # Using GPU 
 python webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device 0
+# Or on Linux: python3 webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device 0
 
 # Using CPU 
 python webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device cpu
+# Or on Linux: python3 webcam.py --weights runs/train/yolov8n-rf/weights/best.pt --device cpu
 ```
 
 That's it! Press `q` or `ESC` to quit the webcam.
+
+``` ############################################################## ```
+``` YOU SHOULDNT HAVE TO DO ANYTHING PAST HERE IF EVERYTHING WORKS ```
+``` ############################################################## ```
+
+
 
 ## YOLOv8 Training and Webcam Inference
 
@@ -101,20 +135,30 @@ Then install the rest:
 pip install -r requirements.txt
 ```
 
-### Quick Setup (interactive)
+### Quick Setup (Interactive - Recommended)
 
-Use the interactive installer to choose NVIDIA CUDA GPU, AMD ROCm GPU/CPU, or CPU-only:
+**The setup script automatically handles virtual environment creation and package installation:**
 
 ```bash
+# Windows:
 python setup.py
+
+# Linux/macOS:
+python setup.py
+# or if python points to Python 2.x:
+python3 setup.py
 ```
 
-This will:
-- Install PyTorch wheels for the chosen backend:
-  - CUDA (cu124) for `g`
-  - ROCm 6.0 for `a` (Linux)
-  - CPU wheels for `r` (ROCm CPU path, Linux) and `c`
-- Install project requirements from `requirements.txt`
+**This automatically:**
+1. **Creates a `.venv` virtual environment** (if not already in one)
+2. **Re-runs itself inside the virtual environment**
+3. Installs PyTorch wheels for your chosen backend:
+   - CUDA (cu124) for `g`
+   - ROCm 6.0 for `a` (Linux)
+   - CPU wheels for `r` (ROCm CPU path, Linux) and `c`
+4. Installs all project requirements from `requirements.txt`
+
+**No manual virtual environment setup required!** The script ensures everything is isolated from your system Python.
 
 ### Training
 
@@ -197,6 +241,32 @@ python3 webcam.py --weights ./runs/train/yolov8n-cpu/weights/best.pt --device cp
   python -c "import torch; print(torch.cuda.is_available(), getattr(torch.version, 'hip', None))"
   ```
   For ROCm GPU (`a`), `cuda.is_available()` should be True and `hip` should show a version. For ROCm CPU (`r`), expect CPU usage.
+
+### Virtual Environment Troubleshooting
+
+**If the setup script fails to create a virtual environment:**
+1. Ensure Python 3.3+ is installed: `python --version`
+2. Verify the `venv` module is available: `python -m venv --help`
+3. Manually create the virtual environment:
+   ```bash
+   # Create virtual environment
+   python -m venv .venv
+   
+   # Activate it
+   # Windows PowerShell:
+   ./.venv/Scripts/Activate.ps1
+   # Windows Command Prompt:
+   .venv\Scripts\activate.bat
+   # Linux/macOS:
+   source .venv/bin/activate
+   
+   # Run setup again
+   python setup.py
+   ```
+
+**If packages are still installing globally:**
+- The setup script should prevent this, but if it happens, delete `.venv` and run `python setup.py` again
+- Verify you're in the virtual environment by checking if the prompt shows `(.venv)` or similar
 
 
 
