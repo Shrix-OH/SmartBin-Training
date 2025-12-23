@@ -1,3 +1,9 @@
+# This is the code I used for training the model
+# It uses the ultralytics library to train the model
+# It uses the whatever dataset
+# It saves the model to the runs/train directory
+# Shrix-OH
+
 import argparse
 import zipfile
 from pathlib import Path
@@ -125,7 +131,6 @@ def main() -> None:
 
     results = model.train(**train_kwargs)
     print("Training complete. Results saved to:", Path(args.project) / args.name)
-
 
 if __name__ == "__main__":
     main()
