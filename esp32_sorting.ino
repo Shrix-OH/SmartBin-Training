@@ -1,4 +1,4 @@
-// This is the code I used for testing the lcd display, serial communication and data transmission from the webcam.py script to the esp32
+// This is the code I used for testing the lcd display, Bluetooth communication and data transmission from the webcam.py script to the esp32
 // Just prints the detected class name to the lcd display
 // Not for final use, just sharing for others to use as a reference (Confirmed working)
 // Shrix-OH
@@ -7,13 +7,17 @@
 
 
 // ESP32 Waste Sorting Display
-// Receives detected class names from webcam.py and displays on LCD
+// Receives detected class names from webcam.py over Bluetooth and displays on LCD
 
 // Use hd44780 library (ESP32 compatible)
 // Install via Arduino IDE: Sketch > Include Library > Manage Libraries > search "hd44780"
 #include <Wire.h>
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_I2Cexp.h>
+#include "BluetoothSerial.h"
+
+// Bluetooth Serial
+BluetoothSerial SerialBT;
 
 // LCD setup - auto-detects I2C address
 hd44780_I2Cexp lcd;
@@ -22,16 +26,23 @@ hd44780_I2Cexp lcd;
 const int LCD_COLS = 16;
 const int LCD_ROWS = 2;
 
-// Serial buffer for incoming data
+// Buffer for incoming data
 String inputBuffer = "";
 String currentClass = "";
 
 void setup() {
-  // Initialize serial for USB communication
+  // Initialize USB serial for debugging
   Serial.begin(115200);
   while (!Serial) {
     ; // Wait for serial port to connect
   }
+  
+  // Initialize Bluetooth
+  if (!SerialBT.begin("ESP32_Sorter")) {
+    Serial.println("Bluetooth init failed!");
+    while (1);
+  }
+  Serial.println("Bluetooth started. Pair with 'ESP32_Sorter'");
   
   // Initialize I2C on ESP32 pins
   Wire.begin(21, 22);  // SDA=21, SCL=22 for ESP32
@@ -57,15 +68,15 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Waste Sorter");
   lcd.setCursor(0, 1);
-  lcd.print("Ready...");
+  lcd.print("BT: ESP32_Sorter");
   
-  Serial.println("ESP32 Waste Sorter Ready");
+  Serial.println("ESP32 Waste Sorter Ready (Bluetooth)");
 }
 
 void loop() {
-  // Check for incoming serial data
-  while (Serial.available()) {
-    char c = Serial.read();
+  // Check for incoming Bluetooth data
+  while (SerialBT.available()) {
+    char c = SerialBT.read();
     
     if (c == '\n') {
       // End of message, process it
@@ -76,6 +87,8 @@ void loop() {
         updateDisplay(currentClass);
         Serial.print("Displaying: ");
         Serial.println(currentClass);
+        // Echo back over Bluetooth for confirmation
+        SerialBT.println("OK: " + currentClass);
       }
       
       inputBuffer = "";
