@@ -1,7 +1,8 @@
 I made this for training ml models to detect classes of rubbish in places like college campuses etc.
 Has classes like plastic bottles, cans, paper, organics etc.
 
-ENV SETUP BROKEN RN
+Use python 3.8 - 3.12 for venv creation, otherwise issues will likely arise.
+I used 3.12 and it works without any identifiable issues.
 
 ## Quick Start
 
